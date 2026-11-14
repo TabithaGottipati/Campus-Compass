@@ -116,9 +116,7 @@ void CampusCompass::PrintZone(string Id) {
         };
     }
 
-    for (auto i:requiredNodes) {
-        graph.checkEdgeStatus()
-    }
+    int cost = graph.primMST(requiredNodes);
 
     // build subgraph:
     //     for each node in set:

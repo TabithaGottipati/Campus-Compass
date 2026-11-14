@@ -120,7 +120,39 @@ vector<int> LocationGraph::getPath(const unordered_map<int,int>& previous,int sr
         reverse(path.begin(), path.end());
         return path;
     }
-vector<pair<int,int>> LocationGraph::getNeighborsInSet(int node, const set<int>& nodes) const {
+int LocationGraph::primMST(const set<int>& nodes){
+        if (nodes.empty()) return 0;
+
+        priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+        set<int> visited;
+        int totalCost = 0;
+
+        // start from first node in set
+        int start = *nodes.begin();
+        pq.push({0, start});
+
+        while (!pq.empty()) {
+            auto [weight, curr] = pq.top();
+            pq.pop();
+
+            // skip if already in tree
+            if (visited.count(curr)) continue;
+            visited.insert(curr);
+            totalCost += weight;
+
+            // look at all neighbors within the subgraph node set
+            for (const auto& edge : getNeighborsInSet(curr, nodes)) {
+                int neighbor   = edge.second;
+                int edgeWeight = edge.first;
+
+                if (!visited.count(neighbor))
+                    pq.push({edgeWeight, neighbor});
+            }
+        }
+
+        return totalCost;
+    }
+vector<pair<int,int>> LocationGraph::getNeighborsInSet(int node, const set<int>& nodes){
         vector<pair<int,int>> result;
 
         if (!adjList.count(node)) return result;
