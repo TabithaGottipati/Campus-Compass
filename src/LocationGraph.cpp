@@ -1,6 +1,9 @@
-//
-// Created by tgott on 11/13/2026.
-//
+#pragma once
+#include <set>
+#include <string>
+#include <vector>
+#include <unordered_map>
+using namespace std;
 class LocationGraph {
 private:
     // Think about what member variables you need to initialize
@@ -9,11 +12,12 @@ private:
     set<pair<int, int>> closedEdges;
 public:
     // Think about what helper functions you will need in the algorithm
-    CampusCompass(); // constructor
-    bool ParseCSV(const string &edges_filepath, const string &classes_filepath);
-    bool ParseCommand(const string &command);
-    bool toggleEdge();
-    int edgeStatus();
-    bool shortestEdges();
-
+    LocationGraph(); // constructor
+    // Right — graph only loads its own data
+    bool loadEdges(const string& filepath);
+    void toggleEdge(int x, int y);
+    string checkEdgeStatus(int x, int y) const;
+    bool isConnected(int x, int y) const;
+    bool nodeExists(int id) const;
+    bool edgeExists(int x, int y) const;
 };

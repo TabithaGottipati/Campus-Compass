@@ -9,7 +9,7 @@
 
 class StudentDatabase {
     public:
-        struct Student {
+        struct student {
             string name;
             string ID;
             int residenceID;
@@ -20,10 +20,21 @@ class StudentDatabase {
         bool dropClass(string id, string classCode);
         bool replaceClass(string id, string oldCode, string newCode);
         int  removeClass(string classCode);
+        bool studentExists(string id, string classCode);
+        int getResidenceID(string classCode);
     private:
-        unordered_map<string, Student> students;          // keyed by string ID
-        unordered_map<string, set<string>> classLists; // class -> set of string IDs
+        std::unordered_map<std::string, Student> students;
+        std::unordered_map<std::string, std::set<std::string>> classToStudents;
+        std::unordered_map<std::string, int> classToLocation;
 
+        // Validation — private, only StudentDatabase calls these
+        bool isValidUFID(const std::string& id) const;
+        bool isValidName(const std::string& name) const;
+        bool isValidClassCode(const std::string& code) const;
+
+        // Index sync helpers
+        void indexAdd(const std::string& studentId, const std::string& classCode);
+        void indexRemove(const std::string& studentId, const std::string& classCode);
 };
 
 #endif //PROJECT3_STUDENTS_H
