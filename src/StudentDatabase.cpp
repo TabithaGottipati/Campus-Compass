@@ -53,10 +53,7 @@ void StudentDatabase::indexRemove(const string& studentId, const string& classCo
 // Public Commands
 // ─────────────────────────────────────────
 
-bool StudentDatabase::insert(const string& name,
-                              const string& id,
-                              int residence,
-                              const vector<string>& classes) {
+bool StudentDatabase::insert(const string& name,const string& id,int residence,const vector<string>& classes) {
     // validate name
     // validate id format
     // check id is unique

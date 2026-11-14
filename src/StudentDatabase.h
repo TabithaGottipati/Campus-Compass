@@ -1,43 +1,87 @@
-//
-// Created by tgott on 11/13/2026.
-//
-
-#ifndef PROJECT3_STUDENTS_H
-#define PROJECT3_STUDENTS_H
-#include <string>
+#pragma once
 #include <set>
+#include <string>
 #include <vector>
 #include <unordered_map>
-using namespace std;
 
 class StudentDatabase {
-    public:
-        struct student {
-            string name;
-            string ID;
-            int residenceID;
-            set<string> classCodes;
-        };
-        bool insert(string name, string id, int residence, vector<string> classes);
-        bool remove(string id);
-        bool dropClass(string id, string classCode);
-        bool replaceClass(string id, string oldCode, string newCode);
-        int  removeClass(string classCode);
-        bool studentExists(string id, string classCode);
-        int getResidenceID(string classCode);
-    private:
-        std::unordered_map<std::string, Student> students;
-        std::unordered_map<std::string, std::set<std::string>> classToStudents;
-        std::unordered_map<std::string, int> classToLocation;
+public:
 
-        // Validation — private, only StudentDatabase calls these
-        bool isValidUFID(const std::string& id) const;
-        bool isValidName(const std::string& name) const;
-        bool isValidClassCode(const std::string& code) const;
+    // ─────────────────────────────────────────
+    // Nested Struct
+    // ─────────────────────────────────────────
 
-        // Index sync helpers
-        void indexAdd(const std::string& studentId, const std::string& classCode);
-        void indexRemove(const std::string& studentId, const std::string& classCode);
+    struct Student {
+        std::string name;
+        std::string studentId;
+        int residenceLocationId;
+        std::set<std::string> classCodes;
+    };
+
+    // ─────────────────────────────────────────
+    // Constructor
+    // ─────────────────────────────────────────
+
+    StudentDatabase();
+
+    // ─────────────────────────────────────────
+    // File Loading
+    // ─────────────────────────────────────────
+
+    bool loadClasses(const std::string& filepath);
+
+    // ─────────────────────────────────────────
+    // Commands
+    // ─────────────────────────────────────────
+
+    bool insert(const std::string& name,
+                const std::string& id,
+                int residence,
+                const std::vector<std::string>& classes);
+
+    bool remove(const std::string& id);
+
+    bool dropClass(const std::string& id,
+                   const std::string& classCode);
+
+    bool replaceClass(const std::string& id,
+                      const std::string& oldCode,
+                      const std::string& newCode);
+
+    int removeClass(const std::string& classCode);
+
+    // ─────────────────────────────────────────
+    // Read Access for CampusCompass
+    // ─────────────────────────────────────────
+
+    const Student* getStudent(const std::string& id) const;
+    int getClassLocation(const std::string& code) const;
+    bool studentExists(const std::string& id) const;
+    bool classExists(const std::string& code) const;
+    std::vector<std::string> getAllClassCodes() const;
+
+private:
+
+    // ─────────────────────────────────────────
+    // Data
+    // ─────────────────────────────────────────
+
+    std::unordered_map<std::string, Student> students;
+    std::unordered_map<std::string, std::set<std::string>> classToStudents;
+    std::unordered_map<std::string, int> classToLocation;
+
+    // ─────────────────────────────────────────
+    // Validation
+    // ─────────────────────────────────────────
+
+    bool isValidUFID(const std::string& id) const;
+    bool isValidName(const std::string& name) const;
+    bool isValidClassCode(const std::string& code) const;
+
+    // ─────────────────────────────────────────
+    // Index Helpers
+    // ─────────────────────────────────────────
+
+    void indexAdd(const std::string& studentId, const std::string& classCode);
+    void indexRemove(const std::string& studentId, const std::string& classCode);
 };
-
-#endif //PROJECT3_STUDENTS_H
