@@ -47,91 +47,85 @@ bool StudentDatabase::isValidUFID(const string& id) const {
     for (char c:id) {
         if (!isdigit(c)) return false;
     }
+    if (students.find(id) != students.end()) return false;
     return true;
 }
 
 bool StudentDatabase::isValidName(const string& name) const {
     if (name.empty()) return false;
     for (char c:name) {
-        if (!isalpha(c)||c==' ') return false;
+        if (!isalpha(c)&&c!=' ') return false;
     }
     return true;
 }
 
-bool StudentDatabase::isValidClassCode(const string& code) const {
+bool StudentDatabase::isValidClassCode(const string& code,const vector<string>& classes) const {
     if (code.length()!=7) return false;
     for (int i=0;i<code.size();i++) {
         if (i<3&&!isalpha(code[i])) return false;
         if (i>2&&!isdigit(code[i])) return false;
     }
+    if (find(classes.begin(),classes.end(),code)==classes.end()) return false;
     return true;
 }
 
-// ─────────────────────────────────────────
-// Private Index Helpers
-// ─────────────────────────────────────────
-
-void StudentDatabase::indexAdd(const string& studentId, const string& classCode) {
-    // add studentId to classToStudents[classCode]
-}
-
-void StudentDatabase::indexRemove(const string& studentId, const string& classCode) {
-    // remove studentId from classToStudents[classCode]
-    // if classToStudents[classCode] is now empty, erase the entry
-}
-
-// ─────────────────────────────────────────
-// Public Commands
-// ─────────────────────────────────────────
-
 bool StudentDatabase::insert(const string& name,const string& id,int residence,const vector<string>& classes) {
     // validate name
-    // validate id format
-    // check id is unique
-    // check classes size is between 1 and 6
-    // validate each class code format
-    // check each class code exists in classToLocation
-    // if any check fails: print "unsuccessful" and return false
-
-    // build Student object
-    // add to students map
-    // call indexAdd for each class code
-    // print "successful"
+    Student student;
+    if (!isValidName(name)) {
+        return false;
+    }
+    if (!isValidUFID(id)) {
+        return false;
+    };
+    student.name = name;
+    student.studentId = id;
+    student.residenceLocationId = residence;
+    if (classes.empty()||classes.size()>6) return false;
+    for (auto i:classes) {
+        if (!isValidClassCode(i)) return false;
+        student.classCodes.insert(i);
+        classToStudents[i].insert(id);
+    }
+    students[id] = student;
 }
 
 bool StudentDatabase::remove(const string& id) {
     // check student exists
+    if (students.find(id)==students.end()) return false;
     // if not: print "unsuccessful" and return false
-
-    // call indexRemove for each of their class codes
-    // erase from students map
-    // print "successful"
+    for (auto i:students[id].classCodes) {
+        classToStudents[i].erase(id);
+    }
+    students.erase(id);
+    return true;
 }
 
 bool StudentDatabase::dropClass(const string& id, const string& classCode) {
-    // check student exists
-    // check student has classCode
-    // if either fails: print "unsuccessful" and return false
-
-    // call indexRemove
-    // erase classCode from student's classCodes set
-    // if student now has 0 classes: erase from students map
-    // print "successful"
+    if (students.find(id)==students.end()) return false;
+    if (!students[id].classCodes.count(classCode)) return false;
+    students[id].classCodes.erase(classCode);
+    classToStudents[classCode].erase(id);
+    if (students[id].classCodes.empty()) {
+        students.erase(id);
+    }
+    return true;
 }
 
-bool StudentDatabase::replaceClass(const string& id,
-                                    const string& oldCode,
-                                    const string& newCode) {
+bool StudentDatabase::replaceClass(const string& id,const string& oldCode,const string& newCode) {
     // check student exists
+    if (students.find(id)==students.end()) return false;
     // check student has oldCode
+    if (!students[id].classCodes.count(oldCode)) return false;
     // check student does NOT already have newCode
+    if (students[id].classCodes.count(newCode)) return false;
     // check newCode exists in classToLocation
-    // if any check fails: print "unsuccessful" and return false
+    if (!classInfo.count(newCode)) return false;
 
-    // call indexRemove for oldCode
-    // call indexAdd for newCode
-    // update student's classCodes set
-    // print "successful"
+    students[id].classCodes.insert(newCode);
+    classToStudents[newCode].insert(id);
+    dropClass(id,oldCode);
+    return true;
 }
 
 int StudentDatabase::removeClass(const string& classCode) {
@@ -162,10 +156,6 @@ int StudentDatabase::getClassInfo(const string& code) const {
 }
 
 bool StudentDatabase::studentExists(const string& id) const {
-
-}
-
-bool StudentDatabase::classExists(const string& code) const {
 
 }
 

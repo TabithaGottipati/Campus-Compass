@@ -7,16 +7,13 @@
 class StudentDatabase {
 public:
 
-    // ─────────────────────────────────────────
-    // Nested Struct
-    // ─────────────────────────────────────────
-
     struct Student {
         std::string name;
         std::string studentId;
         int residenceLocationId;
         std::set<std::string> classCodes;
     };
+
     struct ClassInfo {
         int locationId;
         std::string startTime;
@@ -26,10 +23,6 @@ public:
     StudentDatabase();
 
     bool loadClasses(const std::string& filepath);
-
-    // ─────────────────────────────────────────
-    // Commands
-    // ─────────────────────────────────────────
 
     bool insert(const std::string& name,
                 const std::string& id,
@@ -47,14 +40,10 @@ public:
 
     int removeClass(const std::string& classCode);
 
-    // ─────────────────────────────────────────
-    // Read Access for CampusCompass
-    // ─────────────────────────────────────────
-
     const Student* getStudent(const std::string& id) const;
-    int getClassInfo(const std::string& code) const;
+    const ClassInfo* getClassInfo(const std::string& code) const;
+    int getClassLocation(const std::string& code) const;
     bool studentExists(const std::string& id) const;
-    bool classExists(const std::string& code) const;
     std::vector<std::string> getAllClassCodes() const;
 
 private:
@@ -69,16 +58,8 @@ private:
 
     // ─────────────────────────────────────────
     // Validation
-    // ─────────────────────────────────────────
-
+    // ─────────────────────----------------------------------------------------------------────────
     bool isValidUFID(const std::string& id) const;
     bool isValidName(const std::string& name) const;
     bool isValidClassCode(const std::string& code) const;
-
-    // ─────────────────────────────────────────
-    // Index Helpers
-    // ─────────────────────────────────────────
-
-    void indexAdd(const std::string& studentId, const std::string& classCode);
-    void indexRemove(const std::string& studentId, const std::string& classCode);
 };
