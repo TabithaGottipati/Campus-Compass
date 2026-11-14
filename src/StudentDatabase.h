@@ -5,7 +5,10 @@
 #ifndef PROJECT3_STUDENTS_H
 #define PROJECT3_STUDENTS_H
 #include <string>
-
+#include <set>
+#include <vector>
+#include <unordered_map>
+using namespace std;
 
 class StudentDatabase {
     public:
