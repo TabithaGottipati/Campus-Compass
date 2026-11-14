@@ -59,13 +59,12 @@ bool StudentDatabase::isValidName(const string& name) const {
     return true;
 }
 
-bool StudentDatabase::isValidClassCode(const string& code,const vector<string>& classes) const {
+bool StudentDatabase::isValidClassCode(const string& code) const {
     if (code.length()!=7) return false;
     for (int i=0;i<code.size();i++) {
-        if (i<3&&!isalpha(code[i])) return false;
+        if (i<3&&!isupper(code[i])) return false;
         if (i>2&&!isdigit(code[i])) return false;
     }
-    if (find(classes.begin(),classes.end(),code)==classes.end()) return false;
     return true;
 }
 
@@ -88,6 +87,7 @@ bool StudentDatabase::insert(const string& name,const string& id,int residence,c
         classToStudents[i].insert(id);
     }
     students[id] = student;
+    return true;
 }
 
 bool StudentDatabase::remove(const string& id) {
@@ -141,24 +141,4 @@ int StudentDatabase::removeClass(const string& classCode) {
     }
     classToStudents.erase(classCode);
     return count;
-}
-
-
-const StudentDatabase::Student* StudentDatabase::getStudent(const string& id) const {
-    // find id in students map
-    // return pointer to Student if found, nullptr if not
-}
-
-int StudentDatabase::getClassInfo(const string& code) const {
-    auto it = classInfo.find(code);
-    return it != classInfo.end() ? it->second.locationId : -1;
-}
-
-bool StudentDatabase::studentExists(const string& id) const {
-
-}
-
-vector<string> StudentDatabase::getAllClassCodes() const {
-    // iterate classToLocation
-    // return all keys as a vector
 }
