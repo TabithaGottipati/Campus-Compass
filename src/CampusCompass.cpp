@@ -1,6 +1,7 @@
 #include "CampusCompass.h"
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 using namespace std;
 
 CampusCompass::CampusCompass() {}
@@ -23,64 +24,87 @@ bool CampusCompass::ParseCommand(const string& command) {
     ss >> cmd;
 
     if (cmd == "insert") {
+        string name, id;
+        int residence, n;
+        vector<string> classes;
+
         // parse quoted name
-        // parse id, residence, n
-        // parse n class codes
-        // validate residence node exists in graph
-        // call db.insert()
-        // print successful/unsuccessful
+        string token;
+        getline(ss, token, '"');
+        getline(ss, name, '"');
+
+        if (!(ss >> id >> residence >> n)) { cout << "unsuccessful\n"; return false; }
+        for (int i = 0; i < n; i++) {
+            string code;
+            if (!(ss >> code)) { cout << "unsuccessful\n"; return false; }
+            classes.push_back(code);
+        }
+        // check n matches actual number of classes parsed
+        if ((int)classes.size() != n) { cout << "unsuccessful\n"; return false; }
+
+        cout << (db.insert(name, id, residence, classes) ? "successful" : "unsuccessful") << "\n";
 
     } else if (cmd == "remove") {
-        // parse id
-        // call db.remove()
-        // print successful/unsuccessful
+        string id;
+        if (!(ss >> id)) { cout << "unsuccessful\n"; return false; }
+        cout << (db.remove(id) ? "successful" : "unsuccessful") << "\n";
 
     } else if (cmd == "dropClass") {
-        // parse id, classCode
-        // call db.dropClass()
-        // print successful/unsuccessful
+        string id, classCode;
+        if (!(ss >> id >> classCode)) { cout << "unsuccessful\n"; return false; }
+        cout << (db.dropClass(id, classCode) ? "successful" : "unsuccessful") << "\n";
 
     } else if (cmd == "replaceClass") {
-        // parse id, oldCode, newCode
-        // call db.replaceClass()
-        // print successful/unsuccessful
+        string id, oldCode, newCode;
+        if (!(ss >> id >> oldCode >> newCode)) { cout << "unsuccessful\n"; return false; }
+        cout << (db.replaceClass(id, oldCode, newCode) ? "successful" : "unsuccessful") << "\n";
 
     } else if (cmd == "removeClass") {
-        // parse classCode
-        // call db.removeClass()
-        // if result == -1: print unsuccessful
-        // else print count
+        string classCode;
+        if (!(ss >> classCode)) { cout << "unsuccessful\n"; return false; }
+        int result = db.removeClass(classCode);
+        if (result == -1) cout << "unsuccessful\n";
+        else cout << result << "\n";
 
     } else if (cmd == "toggleEdgesClosure") {
-        // parse n
-        // parse n pairs of location ids
-        // call graph.toggleEdge() for each pair
-        // print successful
+        int n;
+        if (!(ss >> n)) { cout << "unsuccessful\n"; return false; }
+        for (int i = 0; i < n; i++) {
+            int x, y;
+            if (!(ss >> x >> y)) { cout << "unsuccessful\n"; return false; }
+            graph.toggleEdge(x, y);
+        }
+        cout << "successful\n";
 
     } else if (cmd == "checkEdgeStatus") {
-        // parse x, y
-        // call graph.checkEdgeStatus()
-        // print "open", "closed", or "DNE"
+        int x, y;
+        if (!(ss >> x >> y)) { cout << "unsuccessful\n"; return false; }
+        int status = graph.checkEdgeStatus(x, y);
+        if (status == 1)       cout << "open\n";
+        else if (status == 0)  cout << "closed\n";
+        else                   cout << "DNE\n";
 
     } else if (cmd == "isConnected") {
-        // parse x, y
-        // call graph.isConnected()
-        // print successful/unsuccessful
+        int x, y;
+        if (!(ss >> x >> y)) { cout << "unsuccessful\n"; return false; }
+        cout << (graph.isConnected(x, y) ? "successful" : "unsuccessful") << "\n";
 
     } else if (cmd == "printShortestEdges") {
-        // parse id
-        // call handlePrintShortest()
+        string id;
+        if (!(ss >> id)) { cout << "unsuccessful\n"; return false; }
+        PrintShortest(id);
 
     } else if (cmd == "printStudentZone") {
-        // parse id
-        // call handlePrintZone()
+        string id;
+        if (!(ss >> id)) { cout << "unsuccessful\n"; return false; }
+        PrintZone(id);
 
     } else if (cmd == "verifySchedule") {
-        // parse id
-        // call handleVerifySchedule()
+        string id;
+        if (!(ss >> id)) { cout << "unsuccessful\n"; return false; }
+        VerifySchedule(id);
 
     } else {
-        // invalid command
         cout << "unsuccessful\n";
         return false;
     }
@@ -104,36 +128,68 @@ void CampusCompass::PrintShortest(string Id) {
 }
 
 void CampusCompass::PrintZone(string Id) {
-    // get student from db
-    auto [timeToClasses,previous]=graph.dijkstra(db.getStudent(Id)->residenceLocationId);
+    const StudentDatabase::Student* student = db.getStudent(Id);
+
+    auto [timeToClasses, previous] = graph.dijkstra(student->residenceLocationId);
+
     set<int> requiredNodes;
-    for ( auto classCode : timeToClasses) {
-        if (classCode.second == -1) {
-            continue;
-        }
-        for (auto i:graph.getPath(previous,db.getStudent(Id)->residenceLocationId,classCode.first)) {
-            requiredNodes.insert(i);
-        };
+    for (const auto& code : student->classCodes) {
+        int loc = db.getClassLocation(code);
+        if (loc == -1 || timeToClasses[loc] == -1) continue;
+
+        // walk path from residence to this class and collect all nodes
+        vector<int> path = graph.getPath(previous, student->residenceLocationId, loc);
+        for (int node : path)
+            requiredNodes.insert(node);
     }
 
     int cost = graph.primMST(requiredNodes);
-
-    // build subgraph:
-    //     for each node in set:
-    //         for each neighbor in adjList:
-    //             if neighbor also in set → include edge
-    // run primMST on subgraph node set
-    // print total cost
+    cout << "Student Zone Cost For " << student->name << ": " << cost << "\n";
 }
-
+int toMinutes(const string& time) {
+    int hours   = stoi(time.substr(0, 2));
+    int minutes = stoi(time.substr(3, 2));
+    return hours * 60 + minutes;
+}
 void CampusCompass::VerifySchedule(string Id) {
-    // get student from db
-    // get all classes with their start/end times
-    // sort classes by start time
-    // for each consecutive pair (class1, class2):
-    //     calculate time gap in minutes
-    //     run dijkstra from class1.locationId
-    //     get shortest path to class2.locationId
-    //     if gap >= shortest path: print successful
-    //     else: print unsuccessful
+    const StudentDatabase::Student* student = db.getStudent(Id);
+
+    // if only 1 class, print unsuccessful
+    if (student->classCodes.size() == 1) {
+        cout << "unsuccessful\n";
+        return;
+    }
+
+    // build list of {startTime, endTime, locationId, classCode}
+    vector<tuple<int,int,int,string>> classes;
+    for (const auto& code : student->classCodes) {
+        const StudentDatabase::ClassInfo* info = db.getClassInfo(code);
+        if (!info) continue;
+        classes.push_back({toMinutes(info->startTime),
+                           toMinutes(info->endTime),
+                           info->locationId,
+                           code});
+    }
+
+    // sort by start time
+    sort(classes.begin(), classes.end());
+
+    cout << "Schedule Check for " << student->name << ":\n";
+
+    // check each consecutive pair
+    for (size_t i = 0; i < classes.size() - 1; i++) {
+        auto [start1, end1, loc1, code1] = classes[i];
+        auto [start2, end2, loc2, code2] = classes[i+1];
+
+        int gap = start2 - end1;
+
+        // run dijkstra from class1 location to class2 location
+        auto [distances, previous] = graph.dijkstra(loc1);
+        int travelTime = distances.count(loc2) ? distances[loc2] : -1;
+
+        string result = (travelTime != -1 && gap >= travelTime)
+                        ? "successful" : "unsuccessful";
+
+        cout << code1 << " - " << code2 << ": " << result << "\n";
+    }
 }

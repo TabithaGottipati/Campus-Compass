@@ -61,7 +61,7 @@ bool StudentDatabase::isValidName(const string& name) const {
 
 bool StudentDatabase::isValidClassCode(const string& code) const {
     if (code.length()!=7) return false;
-    for (int i=0;i<code.size();i++) {
+    for (size_t i=0;i<code.size();i++) {
         if (i<3&&!isupper(code[i])) return false;
         if (i>2&&!isdigit(code[i])) return false;
     }
