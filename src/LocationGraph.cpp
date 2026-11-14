@@ -120,3 +120,17 @@ vector<int> LocationGraph::getPath(const unordered_map<int,int>& previous,int sr
         reverse(path.begin(), path.end());
         return path;
     }
+vector<pair<int,int>> LocationGraph::getNeighborsInSet(int node, const set<int>& nodes) const {
+        vector<pair<int,int>> result;
+
+        if (!adjList.count(node)) return result;
+
+        for (const auto& edge : adjList.at(node)) {
+            int neighbor = edge.second;
+            int weight   = edge.first;
+            if (nodes.count(neighbor))
+                result.push_back({weight, neighbor});
+        }
+
+        return result;
+    }
