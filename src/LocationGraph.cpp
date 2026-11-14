@@ -28,8 +28,8 @@ using namespace std;
             if (!getline(ss, name, ','))       continue;
             if (!getline(ss, time, ','))         continue;
 
-            adjList[stoi(locationID1)].push_back({stoi(locationID2),stoi(time)});
-            adjList[stoi(locationID2)].push_back({stoi(locationID1),stoi(time)});
+            adjList[stoi(locationID1)].push_back({stoi(time),stoi(locationID2)});
+            adjList[stoi(locationID2)].push_back({stoi(time),stoi(locationID1)});
         }
 
         return true;
@@ -52,7 +52,7 @@ using namespace std;
 
         if (adjList.count(x)) {
             for (auto edge : adjList[x]) {
-                if (edge.first == y) {
+                if (edge.second == y) {
                     if (closedEdges.count({x,y})) {
                         return 0;
                     }
@@ -66,27 +66,35 @@ using namespace std;
     bool LocationGraph::isConnected(int x, int y) {
         return true;
     }
-    unordered_map<int, int> LocationGraph::dijkstra(int src, const set<int>& targets) const {
+    unordered_map<int, int> LocationGraph::dijkstra(int src){
         // min heap {distance, node}
         priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
 
         // set all distances to infinity
-        for (auto edge : adjList[src]) {}
-        // set source distance to 0 and push to queue
+        unordered_map<int, int> distances;
+        for (auto i : adjList) {
+            distances[i.first] = INT_MAX;
+        }
+        distances[src] = 0;
 
+        pq.push({0,src});
         while (!pq.empty()) {
             // pop smallest distance node
+            auto [currDist,currNode] = pq.top();
+            pq.pop();
+            if (currDist > distances[currNode] ) {
+                continue;
+            }
+            for (auto edge : adjList[currNode]) {
+                int currNeigh = edge.second;
+                int currNeighWeight = edge.first;
+                if (closedEdges.count({min(currNeigh, currNode), max(currNeigh, currNode)})) continue;
+                if (distances[currNeigh] > distances[currNode] + currNeighWeight) {
+                    distances[currNeigh] = distances[currNode] + currNeighWeight;
+                    pq.push({distances[currNode] + currNeighWeight,currNeigh});
+                }
 
-            // skip if outdated entry
-
-            // for each neighbor of curr
-            // skip if edge is closed
-            // calculate new distance
-            // if new distance is better, update and push to queue
+            }
         }
-
-        // build result map — only include target nodes
-        // use -1 for unreachable targets
-
-        return result;
+        return distances;
     }

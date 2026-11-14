@@ -13,9 +13,7 @@ public:
     int checkEdgeStatus(int x, int y);  // 1 open, 0 closed, -1 DNE
     bool isConnected(int x, int y);
 
-    std::unordered_map<int, int> dijkstra(
-        int src,
-        const std::set<int>& targets) const;
+    std::unordered_map<int, int> dijkstra(int src);
     int primMST(const std::set<int>& nodes) const;
 
 private:
