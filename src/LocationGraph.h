@@ -3,21 +3,28 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-using namespace std;
+#include <utility>
+
 class LocationGraph {
 public:
     LocationGraph();
     bool loadEdges(const std::string& filepath);
 
+    // Graph commands
     void toggleEdge(int x, int y);
     int checkEdgeStatus(int x, int y);  // 1 open, 0 closed, -1 DNE
     bool isConnected(int x, int y);
 
-    pair<unordered_map<int, int>,unordered_map<int, int>> dijkstra(int src);
+    // Algorithms
+    std::pair<std::unordered_map<int,int>, std::unordered_map<int,int>> dijkstra(int src);
     int primMST(const std::set<int>& nodes) const;
 
-private:
-    std::unordered_map<int, std::vector<std::pair<int, int>>> adjList;
-    std::set<std::pair<int, int>> closedEdges;
+    // Path reconstruction — used by printStudentZone to collect all nodes
+    std::vector<int> getPath(const std::unordered_map<int,int>& previous,
+                              int src,
+                              int target) const;
 
+private:
+    std::unordered_map<int, std::vector<std::pair<int, int>>> adjList; // {weight, neighborId}
+    std::set<std::pair<int, int>> closedEdges;
 };
