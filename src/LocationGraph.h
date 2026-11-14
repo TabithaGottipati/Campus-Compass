@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-
+using namespace std;
 class LocationGraph {
 public:
     LocationGraph();
@@ -13,7 +13,7 @@ public:
     int checkEdgeStatus(int x, int y);  // 1 open, 0 closed, -1 DNE
     bool isConnected(int x, int y);
 
-    std::unordered_map<int, int> dijkstra(int src);
+    pair<unordered_map<int, int>,unordered_map<int, int>> dijkstra(int src);
     int primMST(const std::set<int>& nodes) const;
 
 private:

@@ -64,14 +64,13 @@ using namespace std;
         return -1;
     };
     bool LocationGraph::isConnected(int x, int y) {
-        return true;
+        if (dijkstra(x).first[y]!=-1) return true;
+        return false;
     }
-    unordered_map<int, int> LocationGraph::dijkstra(int src){
-        // min heap {distance, node}
+    pair<unordered_map<int, int>,unordered_map<int, int>> LocationGraph::dijkstra(int src){
         priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
-
-        // set all distances to infinity
         unordered_map<int, int> distances;
+        unordered_map<int, int> previous;
         for (auto i : adjList) {
             distances[i.first] = INT_MAX;
         }
@@ -91,10 +90,11 @@ using namespace std;
                 if (closedEdges.count({min(currNeigh, currNode), max(currNeigh, currNode)})) continue;
                 if (distances[currNeigh] > distances[currNode] + currNeighWeight) {
                     distances[currNeigh] = distances[currNode] + currNeighWeight;
+                    previous[currNeigh] = currNode;
                     pq.push({distances[currNode] + currNeighWeight,currNeigh});
                 }
 
             }
         }
-        return distances;
+        return {distances,previous};
     }
