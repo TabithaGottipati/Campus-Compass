@@ -26,6 +26,7 @@ add_executable(Main
         src/StudentDatabase.cpp
         src/StudentDatabase.h
         src/LocationGraph.cpp
+        src/LocationGraph.h
         # add your own header files below - should be automatically added in CLion
         # example (can also separate with newlines):
         # src/AVL.h src/AVL.cpp
