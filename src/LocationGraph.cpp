@@ -1,4 +1,4 @@
-#pragma once
+
 #include <set>
 #include <string>
 #include <vector>
@@ -6,8 +6,9 @@
 #include "LocationGraph.h"
 #include <sstream>
 #include <fstream>
+#include <queue>
 using namespace std;
-
+    LocationGraph::LocationGraph(){};
     bool LocationGraph::loadEdges(const string& filepath) {
         ifstream file(filepath);
         if (!file.is_open()) return false;
@@ -33,19 +34,59 @@ using namespace std;
 
         return true;
     };
-    bool LocationGraph::toggleEdge(int x, int y) {
-        if (x<y) {
-            closedEdges.insert({x,y});
-            return true;
-        }
+    void LocationGraph::toggleEdge(int x, int y) {
         if (x>y) {
-            closedEdges.insert({y,x});
-            return true;
+            swap(x, y);
         }
-        return false;
-    }
-    string LocationGraph::checkEdgeStatus(int x, int y) const;
-    bool LocationGraph::isConnected(int x, int y) {
+        if (closedEdges.count({x,y})) {
+            closedEdges.erase({x,y});
+        }
+        else {
+            closedEdges.insert({x,y});
+        }
+    };
+    int LocationGraph::checkEdgeStatus(int x, int y) {
+        if (x>y) {
+            swap(x, y);
+        }
 
+        if (adjList.count(x)) {
+            for (auto edge : adjList[x]) {
+                if (edge.first == y) {
+                    if (closedEdges.count({x,y})) {
+                        return 0;
+                    }
+                    return 1;
+                }
+            }
+        }
+
+        return -1;
+    };
+    bool LocationGraph::isConnected(int x, int y) {
+        return true;
     }
-};
+    unordered_map<int, int> LocationGraph::dijkstra(int src, const set<int>& targets) const {
+        // min heap {distance, node}
+        priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+
+        // set all distances to infinity
+        for (auto edge : adjList[src]) {}
+        // set source distance to 0 and push to queue
+
+        while (!pq.empty()) {
+            // pop smallest distance node
+
+            // skip if outdated entry
+
+            // for each neighbor of curr
+            // skip if edge is closed
+            // calculate new distance
+            // if new distance is better, update and push to queue
+        }
+
+        // build result map — only include target nodes
+        // use -1 for unreachable targets
+
+        return result;
+    }

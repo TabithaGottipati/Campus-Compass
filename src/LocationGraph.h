@@ -3,19 +3,23 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-using namespace std;
+
 class LocationGraph {
-private:
-    // Think about what member variables you need to initialize
-    // perhaps some graph representation?
-    unordered_map<int, vector<pair<int, int>>> adjList;
-    set<pair<int, int>> closedEdges;
 public:
-    // Think about what helper functions you will need in the algorithm
-    LocationGraph(); // constructor
-    // Right — graph only loads its own data
-    bool loadEdges(const string& filepath);
-    bool toggleEdge(int x, int y);
-    string checkEdgeStatus(int x, int y) const;
-    bool isConnected(int x, int y) const;
+    LocationGraph();
+    bool loadEdges(const std::string& filepath);
+
+    void toggleEdge(int x, int y);
+    int checkEdgeStatus(int x, int y);  // 1 open, 0 closed, -1 DNE
+    bool isConnected(int x, int y);
+
+    std::unordered_map<int, int> dijkstra(
+        int src,
+        const std::set<int>& targets) const;
+    int primMST(const std::set<int>& nodes) const;
+
+private:
+    std::unordered_map<int, std::vector<std::pair<int, int>>> adjList;
+    std::set<std::pair<int, int>> closedEdges;
+
 };
