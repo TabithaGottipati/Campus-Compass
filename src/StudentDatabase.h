@@ -14,11 +14,11 @@ class StudentDatabase {
             string ID;
             int residenceID;
             set<string> classCodes;
-        }
+        };
         bool insert(string name, string id, int residence, vector<string> classes);
-        bool remove(int id);
-        bool dropClass(int id, string classCode);
-        bool replaceClass(int id, string oldCode, string newCode);
+        bool remove(string id);
+        bool dropClass(string id, string classCode);
+        bool replaceClass(string id, string oldCode, string newCode);
         int  removeClass(string classCode);
     private:
         unordered_map<string, Student> students;          // keyed by string ID
