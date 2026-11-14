@@ -21,6 +21,7 @@ public:
 
     // Path reconstruction — used by printStudentZone to collect all nodes
     std::vector<int> getPath(const std::unordered_map<int,int>& previous,int src,int target);
+    vector<pair<int,int>> getNeighborsInSet(int node, const set<int>& nodes
 private:
     std::unordered_map<int, std::vector<std::pair<int, int>>> adjList; // {weight, neighborId}
     std::set<std::pair<int, int>> closedEdges;

@@ -105,12 +105,21 @@ void CampusCompass::PrintShortest(string Id) {
 
 void CampusCompass::PrintZone(string Id) {
     // get student from db
-    auto timeToClasses=graph.dijkstra(db.getStudent(Id)->residenceLocationId).first;
+    auto [timeToClasses,previous]=graph.dijkstra(db.getStudent(Id)->residenceLocationId);
+    set<int> requiredNodes;
+    for ( auto classCode : timeToClasses) {
+        if (classCode.second == -1) {
+            continue;
+        }
+        for (auto i:graph.getPath(previous,db.getStudent(Id)->residenceLocationId,classCode.first)) {
+            requiredNodes.insert(i);
+        };
+    }
 
-    // run dijkstra from student residence — get distances AND previous map
-    // for each reachable class:
-    //     walk backwards through previous map to reconstruct path
-    //     collect all nodes from all paths into one set
+    for (auto i:requiredNodes) {
+        graph.checkEdgeStatus()
+    }
+
     // build subgraph:
     //     for each node in set:
     //         for each neighbor in adjList:
