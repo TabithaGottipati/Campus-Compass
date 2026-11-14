@@ -130,20 +130,19 @@ bool StudentDatabase::replaceClass(const string& id,const string& oldCode,const 
 
 int StudentDatabase::removeClass(const string& classCode) {
     // check classCode exists in classToStudents
-    // if not: print "unsuccessful" and return 0
-
-    // copy the set of affected student IDs (copy, not reference)
-    // for each affected student:
-    //     call indexRemove
-    //     erase classCode from their classCodes set
-    //     if they now have 0 classes: erase from students map
-    // print count of affected students
-    // return count
+    if (!classToStudents.count(classCode)) return -1;
+    int count = 0;
+    for (auto i :classToStudents[classCode]) {
+        count++;
+        students[i].classCodes.erase(classCode);
+        if (students[i].classCodes.empty()) {
+            students.erase(i);
+        }
+    }
+    classToStudents.erase(classCode);
+    return count;
 }
 
-// ─────────────────────────────────────────
-// Public Read Access
-// ─────────────────────────────────────────
 
 const StudentDatabase::Student* StudentDatabase::getStudent(const string& id) const {
     // find id in students map
