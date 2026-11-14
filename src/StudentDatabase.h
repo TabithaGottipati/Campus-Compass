@@ -17,16 +17,13 @@ public:
         int residenceLocationId;
         std::set<std::string> classCodes;
     };
-
-    // ─────────────────────────────────────────
-    // Constructor
-    // ─────────────────────────────────────────
+    struct ClassInfo {
+        int locationId;
+        std::string startTime;
+        std::string endTime;
+    };
 
     StudentDatabase();
-
-    // ─────────────────────────────────────────
-    // File Loading
-    // ─────────────────────────────────────────
 
     bool loadClasses(const std::string& filepath);
 
@@ -55,7 +52,7 @@ public:
     // ─────────────────────────────────────────
 
     const Student* getStudent(const std::string& id) const;
-    int getClassLocation(const std::string& code) const;
+    int getClassInfo(const std::string& code) const;
     bool studentExists(const std::string& id) const;
     bool classExists(const std::string& code) const;
     std::vector<std::string> getAllClassCodes() const;
@@ -68,7 +65,7 @@ private:
 
     std::unordered_map<std::string, Student> students;
     std::unordered_map<std::string, std::set<std::string>> classToStudents;
-    std::unordered_map<std::string, int> classToLocation;
+    std::unordered_map<std::string, ClassInfo> classInfo;
 
     // ─────────────────────────────────────────
     // Validation

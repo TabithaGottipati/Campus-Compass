@@ -1,5 +1,9 @@
 #include "StudentDatabase.h"
 #include <iostream>
+#include <sstream>
+#include <algorithm>
+#include <fstream>
+#include<cctype>
 using namespace std;
 
 // ─────────────────────────────────────────
@@ -15,25 +19,52 @@ StudentDatabase::StudentDatabase() {
 // ─────────────────────────────────────────
 
 bool StudentDatabase::loadClasses(const string& filepath) {
-    // open file
-    // for each line: parse classCode and locationId
-    // store in classToLocation
+    ifstream file(filepath);
+    if (!file.is_open()) return false;
+
+    string line;
+    getline(file, line); // skip header row
+
+    while (getline(file, line)) {
+        if (line.empty()) continue;
+
+        istringstream ss(line);
+        string code, locationStr, start, end;
+
+        if (!getline(ss, code, ','))        continue;
+        if (!getline(ss, locationStr, ',')) continue;
+        if (!getline(ss, start, ','))       continue;
+        if (!getline(ss, end, ','))         continue;
+
+        classInfo[code] = {stoi(locationStr), start, end};
+    }
+
+    return true;
 }
 
-// ─────────────────────────────────────────
-// Private Validation
-// ─────────────────────────────────────────
-
 bool StudentDatabase::isValidUFID(const string& id) const {
-
+    if (id.length()!=8) return false;
+    for (char c:id) {
+        if (!isdigit(c)) return false;
+    }
+    return true;
 }
 
 bool StudentDatabase::isValidName(const string& name) const {
-
+    if (name.empty()) return false;
+    for (char c:name) {
+        if (!isalpha(c)||c==' ') return false;
+    }
+    return true;
 }
 
 bool StudentDatabase::isValidClassCode(const string& code) const {
-
+    if (code.length()!=7) return false;
+    for (int i=0;i<code.size();i++) {
+        if (i<3&&!isalpha(code[i])) return false;
+        if (i>2&&!isdigit(code[i])) return false;
+    }
+    return true;
 }
 
 // ─────────────────────────────────────────
@@ -125,9 +156,9 @@ const StudentDatabase::Student* StudentDatabase::getStudent(const string& id) co
     // return pointer to Student if found, nullptr if not
 }
 
-int StudentDatabase::getClassLocation(const string& code) const {
-    // find code in classToLocation
-    // return node ID if found, -1 if not
+int StudentDatabase::getClassInfo(const string& code) const {
+    auto it = classInfo.find(code);
+    return it != classInfo.end() ? it->second.locationId : -1;
 }
 
 bool StudentDatabase::studentExists(const string& id) const {
