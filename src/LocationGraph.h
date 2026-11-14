@@ -20,9 +20,7 @@ public:
     int primMST(const std::set<int>& nodes) const;
 
     // Path reconstruction — used by printStudentZone to collect all nodes
-    std::vector<int> getPath(const std::unordered_map<int,int>& previous,
-                              int src,
-                              int target) const;
+    std::vector<int> getPath(const std::unordered_map<int,int>& previous,int src,int target) const;
 
 private:
     std::unordered_map<int, std::vector<std::pair<int, int>>> adjList; // {weight, neighborId}

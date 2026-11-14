@@ -4,14 +4,19 @@
 #include <vector>
 #include <unordered_map>
 #include <set>
+#include "LocationGraph.h"
+#include "StudentDatabase.h"
 using namespace std;
 
 class CampusCompass {
 private:
     // Think about what member variables you need to initialize
     // perhaps some graph representation?
-    unordered_map<int, vector<pair<int, int>>> adjList;
-    set<pair<int, int>> closedEdges;
+    LocationGraph graph;
+    StudentDatabase db;
+    void PrintShortest(std::istringstream& ss);
+    void PrintZone(std::istringstream& ss);
+    void VerifySchedule(std::istringstream& ss);
 public:
     // Think about what helper functions you will need in the algorithm
     CampusCompass(); // constructor
