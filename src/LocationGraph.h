@@ -4,7 +4,7 @@
 #include <vector>
 #include <unordered_map>
 #include <utility>
-
+using namespace std;
 class LocationGraph {
 public:
     LocationGraph();
@@ -20,8 +20,7 @@ public:
     int primMST(const std::set<int>& nodes) const;
 
     // Path reconstruction — used by printStudentZone to collect all nodes
-    std::vector<int> getPath(const std::unordered_map<int,int>& previous,int src,int target) const;
-
+    std::vector<int> getPath(const std::unordered_map<int,int>& previous,int src,int target);
 private:
     std::unordered_map<int, std::vector<std::pair<int, int>>> adjList; // {weight, neighborId}
     std::set<std::pair<int, int>> closedEdges;

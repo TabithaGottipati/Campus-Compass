@@ -142,3 +142,28 @@ int StudentDatabase::removeClass(const string& classCode) {
     classToStudents.erase(classCode);
     return count;
 }
+const StudentDatabase::Student* StudentDatabase::getStudent(const string& id) const {
+    auto it = students.find(id);
+    return it != students.end() ? &it->second : nullptr;
+}
+
+const StudentDatabase::ClassInfo* StudentDatabase::getClassInfo(const string& code) const {
+    auto it = classInfo.find(code);
+    return it != classInfo.end() ? &it->second : nullptr;
+}
+
+int StudentDatabase::getClassLocation(const string& code) const {
+    auto it = classInfo.find(code);
+    return it != classInfo.end() ? it->second.locationId : -1;
+}
+
+bool StudentDatabase::studentExists(const string& id) const {
+    return students.count(id) > 0;
+}
+
+vector<string> StudentDatabase::getAllClassCodes() const {
+    vector<string> codes;
+    for (const auto& [code, info] : classInfo)
+        codes.push_back(code);
+    return codes;
+}

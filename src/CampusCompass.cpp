@@ -92,17 +92,21 @@ bool CampusCompass::ParseCommand(const string& command) {
 // Private Handlers
 // ─────────────────────────────────────────
 
-void CampusCompass::PrintShortest(istringstream& ss) {
+void CampusCompass::PrintShortest(string Id) {
+    cout<<"Time For Shortest Edges: "<<db.getStudent(Id)->name<<endl;
     // get student from db
+    auto timeToClasses=graph.dijkstra(db.getStudent(Id)->residenceLocationId).first;
     // run dijkstra from student residence
-    // for each classCode in student.classCodes (already sorted):
-    //     get locationId from db.getClassLocation(code)
-    //     look up distance in dijkstra result
-    //     print -1 if unreachable
+    for (auto classCode : db.getStudent(Id)->classCodes) {
+
+            cout<<classCode<<": "<<timeToClasses[db.getClassLocation(classCode)]<<endl;
+    }
 }
 
-void CampusCompass::PrintZone(istringstream& ss) {
+void CampusCompass::PrintZone(string Id) {
     // get student from db
+    auto timeToClasses=graph.dijkstra(db.getStudent(Id)->residenceLocationId).first;
+
     // run dijkstra from student residence — get distances AND previous map
     // for each reachable class:
     //     walk backwards through previous map to reconstruct path
@@ -115,7 +119,7 @@ void CampusCompass::PrintZone(istringstream& ss) {
     // print total cost
 }
 
-void CampusCompass::VerifySchedule(istringstream& ss) {
+void CampusCompass::VerifySchedule(string Id) {
     // get student from db
     // get all classes with their start/end times
     // sort classes by start time

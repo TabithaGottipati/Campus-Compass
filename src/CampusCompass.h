@@ -14,9 +14,9 @@ private:
     // perhaps some graph representation?
     LocationGraph graph;
     StudentDatabase db;
-    void PrintShortest(std::istringstream& ss);
-    void PrintZone(std::istringstream& ss);
-    void VerifySchedule(std::istringstream& ss);
+    void PrintShortest(string Id);
+    void PrintZone(string Id);
+    void VerifySchedule(string Id);
 public:
     // Think about what helper functions you will need in the algorithm
     CampusCompass(); // constructor

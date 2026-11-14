@@ -7,6 +7,7 @@
 #include <sstream>
 #include <fstream>
 #include <queue>
+#include <algorithm>
 using namespace std;
     LocationGraph::LocationGraph(){};
     bool LocationGraph::loadEdges(const string& filepath) {
@@ -96,5 +97,26 @@ using namespace std;
 
             }
         }
+        for (pair<int,int> node : distances) {
+            if (node.first== INT_MAX) {
+                node.first = -1;
+            }
+        }
         return {distances,previous};
+    }
+vector<int> LocationGraph::getPath(const unordered_map<int,int>& previous,int src,int target){
+        vector<int> path;
+        int curr = target;
+
+        // walk backwards until we reach source
+        while (curr != src) {
+            // target is unreachable if it's not in previous
+            if (!previous.count(curr)) return {};
+            path.push_back(curr);
+            curr = previous.at(curr);
+        }
+        path.push_back(src);
+
+        reverse(path.begin(), path.end());
+        return path;
     }
