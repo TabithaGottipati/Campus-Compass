@@ -1,84 +1,147 @@
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
-
-// change if you choose to use a different header name
+#include <sstream>
 #include "CampusCompass.h"
-
 using namespace std;
 
-// the syntax for defining a test is below. It is important for the name to be
-// unique, but you can group multiple tests with [tags]. A test can have
-// [multiple][tags] using that syntax.
-TEST_CASE("Example Test Name - Change me!", "[tag]") {
-  // instantiate any class members that you need to test here
-  int one = 1;
+// helper to capture cout output
+string runCommands(const string& input) {
+    CampusCompass compass;
+    compass.ParseCSV("data/edges.csv", "data/classes.csv");
 
-  // anything that evaluates to false in a REQUIRE block will result in a
-  // failing test
-  REQUIRE(one == 0); // fix me!
+    ostringstream output;
+    streambuf* old = cout.rdbuf(output.rdbuf());
 
-  // all REQUIRE blocks must evaluate to true for the whole test to pass
-  REQUIRE(false); // also fix me!
+    istringstream ss(input);
+    int n;
+    ss >> n;
+    ss.ignore();
+    string line;
+    for (int i = 0; i < n; i++) {
+        getline(ss, line);
+        compass.ParseCommand(line);
+    }
+
+    cout.rdbuf(old);
+    return output.str();
 }
 
-TEST_CASE("Test 2", "[tag]") {
-  // you can also use "sections" to share setup code between tests, for example:
-  int one = 1;
-
-  SECTION("num is 2") {
-    int num = one + 1;
-    REQUIRE(num == 2);
-  };
-
-  SECTION("num is 3") {
-    int num = one + 2;
-    REQUIRE(num == 3);
-  };
-
-  // each section runs the setup code independently to ensure that they don't
-  // affect each other
+// ─────────────────────────────────────────
+// Test 1: At least 5 invalid commands
+// ─────────────────────────────────────────
+TEST_CASE("Invalid Commands", "[invalid]") {
+    string result = runCommands(R"(8
+insert "B4d Name" 12345678 20 1 COP3530
+insert "Good Name" 1234 20 1 COP3530
+insert "Good Name" 123456789 20 1 COP3530
+insert "Good Name" 11111111 20 7 COP3530 CDA3101 MAC2311 EEL3701 COP3502 COP3503 COP3504
+insert "Good Name" 22222222 20 1 cop3530
+insert "Good Name" 33333333 20 0 COP3530
+invalidCommand 123
+insert "Good Name" 44444444 20 1 COP353
+)");
+    REQUIRE(result == "unsuccessful\nunsuccessful\nunsuccessful\nunsuccessful\nunsuccessful\nunsuccessful\nunsuccessful\nunsuccessful\n");
 }
 
-// Refer to Canvas for a list of required tests. 
-// We encourage you to write more than required to ensure proper functionality, but only the ones on Canvas will be graded.
+// ─────────────────────────────────────────
+// Test 2: At least 3 edge cases
+// ─────────────────────────────────────────
+TEST_CASE("Edge Cases", "[edge]") {
+    // removing student that doesn't exist
+    string result1 = runCommands(R"(1
+remove 99999999
+)");
+    REQUIRE(result1 == "unsuccessful\n");
 
-// See the following for an example of how to easily test your output.
-// Note that while this works, I recommend also creating plenty of unit tests for particular functions within your code.
-// This pattern should only be used for final, end-to-end testing.
+    // dropClass on class student doesn't have
+    string result2 = runCommands(R"(2
+insert "Josh Smith" 12345678 20 1 COP3530
+dropClass 12345678 MAC2311
+)");
+    REQUIRE(result2 == "successful\nunsuccessful\n");
 
-// This uses C++ "raw strings" and assumes your CampusCompass outputs a string with
-//   the same thing you print.
-TEST_CASE("Example CampusCompass Output Test", "[flag]") {
-  // the following is a "raw string" - you can write the exact input (without
-  //   any indentation!) and it should work as expected
-  // this is based on the input and output of the first public test case
-  string input = R"(6
+    // duplicate student ID
+    string result3 = runCommands(R"(2
+insert "Josh Smith" 12345678 20 1 COP3530
+insert "Jane Smith" 12345678 20 1 MAC2311
+)");
+    REQUIRE(result3 == "successful\nunsuccessful\n");
+
+    // dropClass last class — student should be removed
+    string result4 = runCommands(R"(3
+insert "Josh Smith" 12345678 20 1 COP3530
+dropClass 12345678 COP3530
+remove 12345678
+)");
+    REQUIRE(result4 == "successful\nsuccessful\nunsuccessful\n");
+}
+
+// ─────────────────────────────────────────
+// Test 3: dropClass, removeClass, remove, replaceClass
+// ─────────────────────────────────────────
+TEST_CASE("Core Commands", "[commands]") {
+    // dropClass
+    string result1 = runCommands(R"(3
+insert "Josh Smith" 12345678 20 2 COP3530 MAC2311
+dropClass 12345678 COP3530
+dropClass 12345678 COP3530
+)");
+    REQUIRE(result1 == "successful\nsuccessful\nunsuccessful\n");
+
+    // remove
+    string result2 = runCommands(R"(3
+insert "Josh Smith" 12345678 20 1 COP3530
+remove 12345678
+remove 12345678
+)");
+    REQUIRE(result2 == "successful\nsuccessful\nunsuccessful\n");
+
+    // replaceClass
+    string result3 = runCommands(R"(4
+insert "Josh Smith" 12345678 20 2 COP3530 MAC2311
+replaceClass 12345678 COP3530 CDA3101
+replaceClass 12345678 COP3530 EEL3701
+replaceClass 12345678 CDA3101 MAC2311
+)");
+    REQUIRE(result3 == "successful\nsuccessful\nunsuccessful\nunsuccessful\n");
+
+    // removeClass
+    string result4 = runCommands(R"(6
 insert "Student A" 10000001 1 1 COP3502
 insert "Student B" 10000002 1 1 COP3502
 insert "Student C" 10000003 1 2 COP3502 MAC2311
 dropClass 10000001 COP3502
 remove 10000001
 removeClass COP3502
-)";
+)");
+    REQUIRE(result4 == "successful\nsuccessful\nsuccessful\nsuccessful\nunsuccessful\n2\n");
+}
 
-  string expectedOutput = R"(successful
-successful
-successful
-successful
-unsuccessful
-2
-)";
+TEST_CASE("printShortestEdges with toggled edges", "[shortest]") {
+    CampusCompass compass;
+    compass.ParseCSV("data/edges.csv", "data/classes.csv");
 
-  string actualOutput;
+    ostringstream output;
+    streambuf* old = cout.rdbuf(output.rdbuf());
 
-  // somehow pass your input into your CampusCompass and parse it to call the
-  // correct functions, for example:
-  /*
-  CampusCompass c;
-  c.parseInput(input)
-  // this would be some function that sends the output from your class into a string for use in testing
-  actualOutput = c.getStringRepresentation()
-  */
+    // student at node 21, MAC2311 is at node 18
+    // shortest path: 21 -> 12 -> 13 -> 15 -> 18, distance 11
+    compass.ParseCommand("insert \"Brian\" 35459999 21 1 MAC2311");
 
-  REQUIRE(actualOutput == expectedOutput);
+    // before toggling — should be reachable, distance 11
+    compass.ParseCommand("printShortestEdges 35459999");
+    string before = output.str();
+    output.str("");
+    REQUIRE(before.find("MAC2311: 11") != string::npos);
+
+    // close all 4 edges connected to node 18 (MAC2311)
+    // 15-18, 17-18, 18-25, 18-34
+    compass.ParseCommand("toggleEdgesClosure 4 15 18 17 18 18 25 18 34");
+
+    // after toggling — should be unreachable
+    compass.ParseCommand("printShortestEdges 35459999");
+    string after = output.str();
+    cout.rdbuf(old);
+
+    REQUIRE(after.find("MAC2311: -1") != string::npos);
 }

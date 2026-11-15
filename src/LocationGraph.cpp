@@ -97,9 +97,9 @@ using namespace std;
 
             }
         }
-        for (pair<int,int> node : distances) {
-            if (node.first== INT_MAX) {
-                node.first = -1;
+        for (auto& [node, dist] : distances) {
+            if (dist == INT_MAX) {
+                dist = -1;
             }
         }
         return {distances,previous};
