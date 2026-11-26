@@ -176,7 +176,7 @@ Next, run these commands to build and view your tests.
 Add any source files (.cpp files) you might need to the command.
 Do not add the source file containing the main function.
 ```sh
-g++ -std=c++14 -Werror -Wuninitialized -g build/catch_amalgamated.o test/test.cpp -o build/test
+g++ -std=c++14 -Werror -Wuninitialized -g build/catch_amalgamated.o test/testing.cpp -o build/test
 ./build/test
 ```
 If you make any changes to your files, you can run the last two commands again.
@@ -234,17 +234,18 @@ Catch2 uses its own main function, and as such having your class and function de
 ```
 
 and the `add_executable()` blocks in `CMakeLists.txt` would look like:
+
 ```cmake
 add_executable(Main
         src/main.cpp
         src/CampusCompass.h src/CampusCompass.cpp
-        )
-        
+)
+
 # These tests can use the Catch2-provided main
 add_executable(Tests
-        test/test.cpp
+        test/testing.cpp
         src/CampusCompass.h src/CampusCompass.cpp
-        )
+)
 ```
 
 ## `<catch2/catch_test_macros.hpp>` not found in CLion

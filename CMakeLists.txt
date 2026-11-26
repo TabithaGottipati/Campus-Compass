@@ -34,6 +34,7 @@ add_executable(Main
         
 # These tests can use the Catch2-provided main
 add_executable(Tests
+        test/maxTesting.cpp
         test/test.cpp # your test file
         src/CampusCompass.cpp
         src/CampusCompass.h
@@ -41,13 +42,14 @@ add_executable(Tests
         src/StudentDatabase.h
         src/LocationGraph.cpp
         src/LocationGraph.h
+
         # add your own header files below - should be automatically added in CLion
         # example (can also separate with newlines):
         # src/AVL.h src/AVL.cpp
         )
         
-target_link_libraries(Tests PRIVATE Catch2::Catch2WithMain) #link catch to test.cpp file
-# the name here must match that of your testing executable (the one that has test.cpp)
+target_link_libraries(Tests PRIVATE Catch2::Catch2WithMain) #link catch to testing.cpp file
+# the name here must match that of your testing executable (the one that has testing.cpp)
 
 # comment everything below out if you are using CLion
 include(CTest)
